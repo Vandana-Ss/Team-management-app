@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Folder, CheckSquare, RotateCcw, ArrowLeft, Trash } from 'lucide-react'
-import axios from 'axios'
+import API from '../api/axios'
 import { toast } from 'react-toastify'
 
 const ArchiveBinView = () => {
@@ -13,9 +13,8 @@ const ArchiveBinView = () => {
     try {
       setLoading(true)
       const token = localStorage.getItem('token')
-      
-      // Hitting your clean global API destination path
-      const response = await axios.get('http://localhost:4000/api/archives', { 
+
+      const response = await API.get('/archives', { 
         headers: { Authorization: `Bearer ${token}` }
       })
       setArchivedItems(response.data)
@@ -26,7 +25,6 @@ const ArchiveBinView = () => {
     }
   }, [])
 
-  // Removed the workspaceId requirement so it mounts immediately!
   useEffect(() => {
     fetchArchiveBin()
   }, [fetchArchiveBin])
@@ -37,14 +35,13 @@ const ArchiveBinView = () => {
       const headers = { Authorization: `Bearer ${token}` }
 
       if (itemType === 'task') {
-        // Fallback or dynamic lookup to pass the task's parent workspace id path accurately
-        await axios.patch(`http://localhost:4000/api/tasks/${associatedWorkspaceId}/${itemId}/archive`, 
+        await API.patch(`/tasks/${associatedWorkspaceId}/${itemId}/archive`, 
           { action: 'restore' }, 
           { headers }
         )
         toast.success("Task restored successfully!")
       } else {
-        await axios.patch(`http://localhost:4000/api/workspaces/${itemId}/archive`, 
+        await API.patch(`/workspaces/${itemId}/archive`, 
           { action: 'restore' }, 
           { headers }
         )

@@ -1,4 +1,3 @@
-const http = require('http')
 const express = require('express')
 require('dotenv').config()
 const session = require('express-session')
@@ -10,6 +9,7 @@ const commentRoutes = require('./src/routes/commentRoutes')
 const archiveRoutes = require('./src/routes/archivedRoutes')
 require('./src/config/passport')
 const connectDB = require('./src/config/db')
+const cors = require('cors');
 
 
 const app = express()
@@ -18,8 +18,6 @@ app.set('json spaces', 2)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-
-const cors = require('cors');
 
 const corsOptions = {
     origin: process.env.CLIENT_URL || 'http://localhost:5173', 
@@ -30,11 +28,17 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }
+    cookie: { 
+        secure: isProduction, // true in production (requires HTTPS)
+        sameSite: isProduction ? 'none' : 'lax', // allows cross-site cookies in prod
+        maxAge: 24 * 60 * 60 * 1000 
+    }
 }))
 
 app.use(passport.initialize())
@@ -57,7 +61,7 @@ const startServer = async () => {
         await connectDB()
 
         app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`)
+            console.log(`Server successfully initialized and listening on port ${PORT}`)
         }) 
     }
     catch (err){

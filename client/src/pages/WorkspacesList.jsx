@@ -46,8 +46,8 @@ const WorkspacesList = () => {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {workspaces.map((ws) => (
-              <tr 
-                key={ws._id} 
+              <tr
+                key={ws._id}
                 onClick={() => navigate(`/workspace/${ws._id}`)}
                 className="hover:bg-gray-50/50 cursor-pointer transition-colors group"
               >
@@ -65,14 +65,14 @@ const WorkspacesList = () => {
 
                 {/* Created At */}
                 <td className="px-6 py-5 text-gray-500 text-sm">
-                   {new Date(ws.createdAt).toLocaleDateString()}
+                  {ws.createdAt ? new Date(ws.createdAt).toLocaleDateString() : "Unknown"}
                 </td>
 
                 {/* Owner */}
                 <td className="px-6 py-5 text-gray-600 text-sm">
                   <div className="flex items-center gap-2">
                     <User size={14} className="text-gray-300" />
-                    {ws.owner?.name || "You"}
+                    {ws.owner?.name || "Workspace Admin"}
                   </div>
                 </td>
 

@@ -1,6 +1,7 @@
 const GoogleButton = ({ text = "Continue with Google" }) => {
     const handleGoogleAuth = () => {
-        window.location.href = 'http://localhost:4000/api/auth/google';
+        const baseUrl = meta.env.VITE_API_URL || 'http://localhost:4000/api'
+        window.location.href = `${baseUrl}/auth/google`;
     }
 
     return (

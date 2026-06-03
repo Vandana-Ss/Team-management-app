@@ -47,7 +47,6 @@ const joinWorkspace = async (req, res) => {
             return res.status(400).json({ message: 'You are already a member or have a pending request' })
         }
 
-        // Create with status: 'pending'
         await Member.create({
             user: userId,
             workspace: workspace._id,
@@ -97,7 +96,11 @@ const getUserWorkspaces = async (req, res) => {
         }).populate({
             path: 'workspace',
             model: 'Workspace',
-            match: { isArchived: { $ne: true } }
+            match: { isArchived: { $ne: true } },
+            populate: {
+                path: 'owner',
+                select: 'name'
+            }
         })
 
         const activeMemberships = memberships.filter(m => m.workspace && m.workspace._id)
@@ -113,20 +116,21 @@ const getUserWorkspaces = async (req, res) => {
             // Count active members
             const totalCount = await Member.countDocuments({ workspace: workspace._id })
 
-            // 3. FIXED: Count active tasks so Home.jsx can display the correct "Total Tasks" number!
             const taskCount = await Task.countDocuments({
                 workspace: m.workspace._id,
                 isArchived: { $ne: true }
             })
 
-            // Return both counts to the frontend
             return {
                 _id: m.workspace._id,
                 name: m.workspace.name,
                 inviteCode: m.workspace.inviteCode,
                 isArchived: m.workspace.isArchived,
                 totalCount: totalCount,
-                taskCount: taskCount
+                taskCount: taskCount,
+                createdAt: m.workspace.createdAt,
+                updatedAt: m.workspace.updatedAt,
+                owner: m.workspace.owner || { name: "System" }
             }
         }))
 

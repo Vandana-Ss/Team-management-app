@@ -87,13 +87,13 @@ const Workspace = () => {
     setIsArchiveModalOpen(true)
   }
 
-  const handleConfirmArchive = async () => {
+  /*const handleConfirmArchive = async () => {
     try {
       const token = localStorage.getItem('token')
       const headers = { Authorization: `Bearer ${token}` }
 
       if (activeItem.type === 'task') {
-        await axios.patch(`http://localhost:4000/api/tasks/${workspaceId}/${activeItem.id}/archive`,
+        await API.patch(`/tasks/${workspaceId}/${activeItem.id}/archive`,
           { action: 'archive' },
           { headers }
         )
@@ -103,7 +103,7 @@ const Workspace = () => {
 
         fetchWorkspaceData(activeFilters)
       } else {
-        await axios.patch(`http://localhost:4000/api/workspaces/${activeItem.id}/archive`,
+        await API.patch(`/workspaces/${activeItem.id}/archive`,
           { action: 'archive' },
           { headers }
         )
@@ -115,7 +115,26 @@ const Workspace = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || "Archiving operation failed")
     }
+  }*/
+
+  const handleConfirmArchive = async () => {
+  try {
+    if (activeItem.type === 'task') {
+      await API.patch(`/tasks/${workspaceId}/${activeItem.id}/archive`, { action: 'archive' })
+      setTasks(prevTasks => prevTasks.filter(task => task._id !== activeItem.id))
+      toast.success("Task moved to archive bin")
+      fetchWorkspaceData(activeFilters)
+    } else {
+      await API.patch(`/workspaces/${activeItem.id}/archive`, { action: 'archive' })
+      toast.success("Workspace archived successfully")
+      navigate('/workspaces')
+    }
+
+    setIsArchiveModalOpen(false)
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Archiving operation failed")
   }
+}
 
   const handleStatusUpdate = async (memberId, action) => {
     try {

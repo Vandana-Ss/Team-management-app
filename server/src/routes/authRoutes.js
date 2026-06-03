@@ -8,11 +8,8 @@ router.post('/register', registerUser)
 router.post('/login', loginUser)
 router.get('/users', getUsers)
 
-// google auth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
-// google auth callback
-// google auth callback
 router.get('/google/callback', 
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
     (req, res) => {
