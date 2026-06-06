@@ -37,7 +37,7 @@ const getArchiveBin = async (req, res) => {
 
 const getGlobalArchiveBin = async (req, res) => {
   try {
-    // Finds everything archived by the currently logged-in user, populated cleanly
+    // Finds everything archived by the currently logged-in user
     const archivedItems = await Archive.find({ archivedBy: req.user._id })
       .populate('workspace', 'name')
       .populate({

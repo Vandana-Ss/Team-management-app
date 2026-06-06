@@ -15,7 +15,6 @@ router.get('/google/callback',
     (req, res) => {
         const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '30d' })
         
-        // FIX: Use the environment variable, fallback to 5173 for local dev
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
         res.redirect(`${clientUrl}/login-success?token=${token}`)
     }

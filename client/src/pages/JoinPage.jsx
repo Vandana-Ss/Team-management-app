@@ -43,11 +43,9 @@ const JoinPage = () => {
 
   return (
     <div className="h-screen w-full bg-[#F9FBFA] flex items-center justify-center p-6 overflow-hidden relative">
-      {/* Soft Light Mode Blobs */}
       <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-[#00ED64]/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#00ED64]/10 rounded-full blur-3xl"></div>
 
-      {/* Light Glassmorphism Card */}
       <div className="bg-white/70 backdrop-blur-2xl border border-white/50 max-w-md w-full p-10 rounded-[40px] text-center shadow-[0_20px_50px_rgba(0,0,0,0.05)] animate-in fade-in zoom-in duration-500 relative z-10">
         <div className="mb-6 inline-block rounded-3xl bg-[#F0FDF4] p-6 text-[#00684A] font-black text-3xl shadow-sm">
           {workspace.name.charAt(0)}

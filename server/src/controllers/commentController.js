@@ -27,7 +27,6 @@ const addComment = async (req, res) => {
           return sendMentionEmail(user.email, req.user.name, task.workspace, taskId, task.title)
             .catch(err => {
               console.error(`Failed to send mention email to ${user.email}:`, err);
-              // swallow here so one failure doesn't reject the whole Promise.all
             });
         }
         return Promise.resolve();

@@ -8,6 +8,7 @@ import WorkspacesList from './pages/WorkspacesList'
 import Task from './pages/Task'
 import JoinPage from './pages/JoinPage'
 import ArchiveBinView from './pages/ArchiveBinView'
+import Settings from './pages/Settings'
 
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('token')
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/workspaces" element={<WorkspacesList />} />
         <Route path="/workspace/:workspaceId/task/:taskId" element={<Task />} />
         <Route path="/archive-bin" element={<ArchiveBinView />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
   )

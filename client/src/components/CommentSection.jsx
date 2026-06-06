@@ -42,15 +42,14 @@ const CommentSection = ({ taskId, workspaceMembers }) => {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      {/* Input Area - Now uses bg-white for visibility */}
-      <div className="relative bg-white p-1 rounded-2xl border-2 border-gray-100 focus-within:border-[#00ED64] transition-all flex items-center shadow-sm">
+    <div className="flex flex-col h-full space-y-3 p-3">
+      <div className="relative bg-[#F8FAFC] p-1 rounded-lg border border-gray-200 focus-within:bg-white focus-within:border-green-200 focus-within:ring-1 focus-within:ring-green-800 transition-all flex items-center shadow-inner">
         <div className="flex-1">
           <MentionsInput
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Share a thought..."
-            className="syncnode-mentions"
+            placeholder="Initialize communication..."
+            className="syncnode-mentions text-[11px] font-medium text-[#001E2B]"
             allowSuggestionsAboveCursor={true}
           >
             <Mention
@@ -61,38 +60,39 @@ const CommentSection = ({ taskId, workspaceMembers }) => {
               })}
               markup="@[__display__](__id__)"
               displayTransform={(id, display) => `@${display}`}
-              className="bg-[#00ED64]/20 text-[#166534] font-bold rounded px-1"
+              className="bg-[#001E2B] text-[#00ED64] font-bold rounded-sm px-1 py-0.5 text-[11px] shadow-sm"
             />
           </MentionsInput>
         </div>
 
         <button
           onClick={handlePostComment}
-          className="mr-1 bg-[#001E2B] text-white p-2.5 rounded-full hover:bg-black transition-all active:scale-90 shadow-md shrink-0 cursor-pointer"
+          className="ml-1 mr-0.5 bg-[#001E2B] text-[#00ED64] p-2 rounded hover:bg-black transition-all active:scale-95 shadow-md shrink-0 cursor-pointer"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
           </svg>
         </button>
       </div>
 
-      {/* Scrollable Comment List */}
-      <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar">
         {comments.map(c => (
-          <div key={c._id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
-            <div className='flex justify-between items-center mb-2'>
-              <span className="text-[10px] font-black uppercase text-[#001E2B] tracking-widest opacity-70">
+          <div key={c._id} className="bg-[#F8FAFC] p-3 rounded-lg border border-transparent hover:border-gray-200 transition-colors">
+            
+            <div className='flex justify-between items-center mb-1'>
+              <span className="text-[9px] font-bold uppercase text-[#001E2B] tracking-[0.2em]">
                 {c.user?.name || "Member"}
               </span>
-              <span className="text-[9px] font-bold text-gray-400 uppercase">
+              <span className="text-[8px] font-mono font-medium text-gray-400 uppercase tracking-widest">
                 {formatCommentDate(c.createdAt)}
               </span>
             </div>
-            <div className="text-sm text-gray-600 leading-relaxed">
+            
+            <div className="text-[12px] text-[#001E2B] leading-snug">
               {c.content.split(/(@\[.*?\]\(.*?\))/g).map((part, index) => {
                 const mentionMatch = part.match(/@\[(.*?)\]\(.*?\)/);
                 return mentionMatch ? (
-                  <span key={index} className="text-[#166534] bg-[#F0FDF4] px-1.5 py-0.5 rounded-lg font-bold">
+                  <span key={index} className="text-blue-800 px-1 py-0.5 rounded-[3px] font-bold text-[10px] ">
                     @{mentionMatch[1]}
                   </span>
                 ) : part;

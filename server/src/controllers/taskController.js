@@ -30,7 +30,6 @@ const getTaskById = async (req, res) => {
     try {
         const { taskId } = req.params
         const task = await Task.findById(taskId)
-            // Fix: Populate the actual field names from your Schema
             .populate('primaryAssignee', 'name email')
             .populate('secondaryAssignee', 'name email')
             .populate('createdBy', 'name')

@@ -52,7 +52,6 @@ const Sidebar = () => {
           </Link>
         ))}
 
-        {/* FIXED: Shifted inside the wrapping div wrapper block and optimized for your dark theme palette */}
         <NavLink
           to={`/archive-bin`}
           className={({ isActive }) =>

@@ -4,10 +4,8 @@ const ArchiveModal = ({ isOpen, onClose, onConfirm, itemName, itemType }) => {
   if (!isOpen) return null
 
   return (
-    // Backdrop blur container covering the entire viewport
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md transition-all duration-300">
       
-      {/* Glassmorphic Modal Box */}
       <div className="w-full max-w-md p-6 mx-4 rounded-2xl border border-white/20 bg-white/10 dark:bg-zinc-900/40 shadow-2xl backdrop-blur-xl text-zinc-800 dark:text-zinc-100">
         <h3 className="text-xl font-semibold tracking-wide mb-2">
           Archive {itemType === 'workspace' ? 'Workspace' : 'Task'}?
@@ -18,7 +16,6 @@ const ArchiveModal = ({ isOpen, onClose, onConfirm, itemName, itemType }) => {
           {itemType === 'workspace' && " This will also archive all tasks belonging to this workspace."} You can restore it later.
         </p>
 
-        {/* Action Buttons */}
         <div className="flex justify-end gap-3 font-medium text-sm">
           <button
             onClick={onClose}

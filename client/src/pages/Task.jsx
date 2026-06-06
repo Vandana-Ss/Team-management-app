@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
   CheckCircle2,
@@ -8,42 +8,26 @@ import {
   User,
   Clock,
   Calendar,
-  ChevronDown
-} from 'lucide-react'
-import API from '../api/axios'
-import CommentSection from '../components/CommentSection'
-import { toast } from 'react-toastify'
+  ChevronDown,
+  X,
+  Search
+} from 'lucide-react';
+import API from '../api/axios';
+import CommentSection from '../components/CommentSection';
+import { toast } from 'react-toastify';
 
 const Task = () => {
-  const { workspaceId, taskId } = useParams()
-  const navigate = useNavigate()
+  const { workspaceId, taskId } = useParams();
+  const navigate = useNavigate();
 
-  const [task, setTask] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [primaryQuery, setPrimaryQuery] = useState('')
-  const [secondaryQuery, setSecondaryQuery] = useState('')
-  const [suggestions, setSuggestions] = useState([])
-  const [activeDropdown, setActiveDropdown] = useState(null)
+  const [task, setTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [primaryQuery, setPrimaryQuery] = useState('');
+  const [secondaryQuery, setSecondaryQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  const [workspaceMembers, setWorkspaceMembers] = useState([])
-
-  useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        setLoading(true)
-        const { data } = await API.get(`/tasks/${workspaceId}/${taskId}`)
-        setTask(data)
-        setPrimaryQuery(data.primaryAssignee?.name || '')
-        setSecondaryQuery(data.secondaryAssignee?.name || '')
-      } catch (err) {
-        toast.error("Task not found")
-        navigate(`/workspace/${workspaceId}`)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchTask()
-  }, [taskId, workspaceId, navigate])
+  const [workspaceMembers, setWorkspaceMembers] = useState([]);
 
   useEffect(() => {
     const fetchTaskAndMembers = async () => {
@@ -54,7 +38,6 @@ const Task = () => {
         setPrimaryQuery(taskData.primaryAssignee?.name || '');
         setSecondaryQuery(taskData.secondaryAssignee?.name || '');
 
-        // @mention dropdown
         const { data: membersData } = await API.get(`/workspaces/${workspaceId}/members`);
         setWorkspaceMembers(membersData.filter(member => member.user).map(member => member.user));
       } catch (err) {
@@ -67,142 +50,174 @@ const Task = () => {
     fetchTaskAndMembers();
   }, [taskId, workspaceId, navigate]);
 
-
   const updateField = async (fieldName, value) => {
     try {
       const { data } = await API.patch(`/tasks/${workspaceId}/${taskId}`, {
         [fieldName]: value
-      })
-      setTask(data)
-      toast.success(`${fieldName} updated`)
+      });
+      setTask(data);
+      toast.success(`${fieldName.replace(/([A-Z])/g, ' $1').trim()} updated`);
     } catch (err) {
-      toast.error("Update failed")
+      toast.error("Update failed");
     }
-  }
+  };
 
   useEffect(() => {
-    const query = activeDropdown === 'primary' ? primaryQuery : secondaryQuery
+    const query = activeDropdown === 'primary' ? primaryQuery : secondaryQuery;
     if (!activeDropdown || query.length < 1) {
-      setSuggestions([])
-      return
+      setSuggestions([]);
+      return;
     }
     const timer = setTimeout(async () => {
       try {
-        const { data } = await API.get(`/workspaces/${workspaceId}/search-members?query=${query}`)
-        setSuggestions(data)
+        const { data } = await API.get(`/workspaces/${workspaceId}/search-members?query=${query}`);
+        setSuggestions(data);
       } catch (err) {
-        console.error("Search failed", err)
+        console.error("Search failed", err);
       }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [primaryQuery, secondaryQuery, activeDropdown, workspaceId])
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [primaryQuery, secondaryQuery, activeDropdown, workspaceId]);
 
   const getStatusStyles = (status) => {
     switch (status) {
       case 'Done':
       case 'Pass':
-        return 'bg-[#F0FDF4] text-[#166534]'; 
+        return 'bg-green-200 text-green-600 border-transparent shadow-md';
       case 'In Progress':
-        return 'bg-blue-100 text-blue-600'; 
+        return 'bg-blue-200 text-blue-600 border-blue-200 shadow-sm';
       case 'Fail':
-        return 'bg-red-100 text-red-600'; 
+        return 'bg-white text-red-600 border-red-200 shadow-sm';
       case 'Checked In':
-        return 'bg-purple-100 text-purple-600'; 
+        return 'bg-purple-200 text-purple-600 border-purple-200 shadow-sm';
       default:
-        return 'bg-gray-100 text-gray-500'; 
+        return 'bg-[#F8FAFC] text-gray-500 border-gray-200 shadow-inner hover:bg-white';
     }
   };
 
-  if (loading) return <div className="p-10 text-gray-400 animate-pulse">Syncing Task Board...</div>
-  if (!task) return null
+  if (loading) return <div className="flex h-screen items-center justify-center text-[#001E2B] tracking-widest text-sm uppercase font-bold animate-pulse">Syncing Telemetry...</div>;
+  if (!task) return null;
 
   return (
-    <div className="w-full space-y-6 pb-20">
+    <div className="w-full space-y-4 pb-20 max-w-[1400px] mx-auto">
+      
       <button
         onClick={() => navigate(`/workspace/${workspaceId}`)}
-        className="flex items-center gap-2 text-gray-400 hover:text-[#001E2B] transition-colors mb-4 group"
+        className="flex items-center gap-2 text-gray-400 hover:text-[#001E2B] transition-all mb-2 group font-semibold text-xs tracking-widest uppercase"
       >
-        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-        <span>Back to Workspace</span>
+        <ArrowLeft size={14} className="group-hover:-translate-x-1.5 transition-transform" />
+        <span>Return</span>
       </button>
 
-      {/* MODIFIED: Changed min-h-[80vh] to a fixed h-[85vh] to trap the flexbox grid */}
-      <div className="bg-white rounded-4xl shadow-xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[85vh]">
-
-        {/* MODIFIED: Added overflow-y-auto and custom-scrollbar so the left panel scrolls independently */}
-        <div className="flex-[2.5] border-r border-gray-50 overflow-y-auto custom-scrollbar">
-          <div className="p-8 bg-gray-50/50 border-b border-gray-50">
+      <div className="bg-white rounded-xl shadow-[0_20px_50px_-12px_rgba(0,30,43,0.15)] border border-gray-200/60 overflow-hidden flex flex-col lg:flex-row h-[75vh]">
+        
+        {/* LEFT COLUMN */}
+        <div className="flex-[2.5] border-r border-gray-100 overflow-y-auto custom-scrollbar bg-white">
+          
+          <div className="p-6 border-b border-gray-100 bg-white/90 backdrop-blur-md sticky top-0 z-10">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3 text-gray-400 text-xs font-bold uppercase">
-                <ClipboardList size={16} />
-                <span>Task Item : #{task.numericId}</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#001E2B] rounded text-[#00ED64] text-[10px] font-mono font-bold tracking-[0.2em] uppercase shadow-inner">
+                <ClipboardList size={12} className="text-gray-400" />
+                <span>ID-{task.numericId}</span>
               </div>
 
-              {/* Refined Priority Selector */}
               <div className="relative group">
                 <select
                   value={task.priority}
                   onChange={(e) => updateField('priority', e.target.value)}
-                  className={`appearance-none text-[10px] font-black uppercase pl-4 pr-8 py-2 rounded-full border-none cursor-pointer outline-none shadow-sm transition-all ${task.priority === 'high' ? 'bg-red-100 text-red-600' :
-                    task.priority === 'medium' ? 'bg-[#F0FDF4] text-[#166534]' : 'bg-blue-100 text-blue-600'
-                    }`}
+                  className={`appearance-none text-[11px] font-bold uppercase tracking-wider pl-4 pr-8 py-1.5 rounded border outline-none transition-all cursor-pointer ${
+                    task.priority === 'high' ? 'bg-red-50 text-red-600 border-red-200' :
+                    task.priority === 'medium' ? 'bg-yellow-100 text-orange-600 border-transparent' : 
+                    'bg-gray-50 text-gray-600 border-gray-200'
+                  }`}
                 >
                   <option value="low">Low Priority</option>
                   <option value="medium">Medium Priority</option>
                   <option value="high">High Priority</option>
                 </select>
-                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" />
+                <ChevronDown size={12} className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${task.priority === 'medium' ? 'text-white' : 'text-gray-400'}`} />
               </div>
             </div>
 
             <input
               type="text"
-              className="text-xl font-bold text-[#001E2B] bg-transparent border-none outline-none focus:ring-2 focus:ring-[#00ED64] rounded-xl w-full px-2 transition-all"
+              className="text-2xl font-black tracking-tight text-[#001E2B] bg-transparent border-none outline-none focus:ring-0 w-full p-0 placeholder-gray-200 transition-all"
               defaultValue={task.title}
-              onBlur={(e) => updateField('title', e.target.value)}
+              onBlur={(e) => {
+                if (e.target.value !== task.title) updateField('title', e.target.value);
+              }}
+              placeholder="Task Designation..."
             />
           </div>
 
-          <div className="p-8 space-y-10">
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Description</h3>
+          <div className="p-6 space-y-6">
+            
+            <div className="space-y-2">
+              <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Specifications</h3>
               <textarea
-                className="w-full p-6 rounded-3xl bg-gray-50 border-none focus:ring-2 focus:ring-[#00ED64] min-h-12.5 outline-none text-[#001E2B] transition-all resize-none"
+                className="w-full p-4 rounded-lg bg-[#F8FAFC] border border-transparent hover:border-gray-200 focus:bg-white focus:border-[#001E2B] focus:ring-1 focus:ring-[#001E2B] min-h-[100px] outline-none text-[#001E2B] transition-all resize-none text-sm font-medium leading-relaxed"
                 defaultValue={task.description}
-                onBlur={(e) => updateField('description', e.target.value)}
-                placeholder="Write the technical requirements here..."
+                onBlur={(e) => {
+                  if (e.target.value !== (task.description || '')) {
+                    updateField('description', e.target.value);
+                  }
+                }}
+                placeholder="Initialize technical requirements..."
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { label: 'Primary Assignee', query: primaryQuery, setQuery: setPrimaryQuery, key: 'primaryAssignee', type: 'primary' },
-                { label: 'Secondary Assignee', query: secondaryQuery, setQuery: setSecondaryQuery, key: 'secondaryAssignee', type: 'secondary' }
+                { label: 'Lead Developer', query: primaryQuery, setQuery: setPrimaryQuery, key: 'primaryAssignee', type: 'primary' },
+                { label: 'Support Role', query: secondaryQuery, setQuery: setSecondaryQuery, key: 'secondaryAssignee', type: 'secondary' }
               ].map((field) => (
-                <div key={field.type} className="space-y-3 relative">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">{field.label}</label>
-                  <input
-                    type="text"
-                    className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-[#00ED64] text-[#001E2B] transition-all"
-                    value={field.query}
-                    onChange={(e) => field.setQuery(e.target.value)}
-                    onFocus={() => setActiveDropdown(field.type)}
-                    placeholder="Search member..."
-                  />
+                <div key={field.type} className="space-y-2 relative">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{field.label}</label>
+                  <div className="relative group">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#001E2B] transition-colors" />
+                    <input
+                      type="text"
+                      className="w-full py-2.5 pl-9 pr-9 bg-[#F8FAFC] border border-transparent rounded-lg outline-none focus:bg-white focus:border-[#001E2B] focus:ring-1 focus:ring-[#001E2B] text-[#001E2B] text-sm font-semibold transition-all"
+                      value={field.query}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.setQuery(val);
+                        if (val.trim() === '') {
+                          updateField(field.key, null);
+                          setActiveDropdown(null);
+                        }
+                      }}
+                      onFocus={() => setActiveDropdown(field.type)}
+                      placeholder="Assign personnel..."
+                    />
+                    {field.query && (
+                      <button 
+                        onClick={() => {
+                          field.setQuery('');
+                          updateField(field.key, null);
+                          setActiveDropdown(null);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1 bg-[#F8FAFC] group-focus-within:bg-white"
+                      >
+                        <X size={14} strokeWidth={3} />
+                      </button>
+                    )}
+                  </div>
+
                   {activeDropdown === field.type && suggestions.length > 0 && (
-                    <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 shadow-2xl rounded-lg overflow-hidden animate-in fade-in slide-in-from-top-1">
                       {suggestions.map((user) => (
                         <button
                           key={user._id}
-                          className="w-full text-left p-4 hover:bg-[#F0FDF4] flex flex-col border-b border-gray-50 last:border-0"
+                          className="w-full text-left px-3 py-2.5 hover:bg-[#001E2B] hover:text-white flex flex-col border-b border-gray-100 last:border-0 transition-colors group"
                           onClick={() => {
-                            updateField(field.key, user._id)
-                            field.setQuery(user.name)
-                            setActiveDropdown(null)
+                            updateField(field.key, user._id);
+                            field.setQuery(user.name);
+                            setActiveDropdown(null);
                           }}
                         >
-                          <span className="font-bold text-[#001E2B]">{user.name}</span>
-                          <span className="text-xs text-gray-400">{user.email}</span>
+                          <span className="font-bold text-sm">{user.name}</span>
+                          <span className="text-[10px] text-gray-400 group-hover:text-gray-300 font-mono mt-0.5">{user.email}</span>
                         </button>
                       ))}
                     </div>
@@ -211,32 +226,33 @@ const Task = () => {
               ))}
             </div>
 
-            <div className="space-y-6">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <CheckCircle2 size={18} className="text-[#00ED64]" /> Status Workflow
+            {/* Workflow Section */}
+            <div className="space-y-3 pt-2">
+              <h3 className="text-[10px] font-bold text-[#001E2B] uppercase tracking-[0.2em] flex items-center gap-2 border-b border-gray-100 pb-2">
+                <CheckCircle2 size={14} className="text-[#00ED64]" /> Pipeline Status
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   { label: 'Development', key: 'devStatus', options: ['Not Started', 'In Progress', 'Checked In', 'Done'] },
                   { label: 'Unit Test', key: 'unitTestStatus', options: ['Not Started', 'In Progress', 'Pass', 'Fail'] },
-                  { label: 'SIT', key: 'sitStatus', options: ['Not Started', 'In Progress', 'Pass', 'Fail'] },
-                  { label: 'UAT', key: 'uatStatus', options: ['Not Started', 'In Progress', 'Pass', 'Fail'] }
+                  { label: 'System Integration', key: 'sitStatus', options: ['Not Started', 'In Progress', 'Pass', 'Fail'] },
+                  { label: 'User Acceptance', key: 'uatStatus', options: ['Not Started', 'In Progress', 'Pass', 'Fail'] }
                 ].map((phase) => (
-                  <div key={phase.key} className="p-4 rounded-3xl bg-gray-50 border border-gray-100 flex flex-col gap-2 relative group">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">{phase.label}</span>
+                  <div key={phase.key} className="p-2.5 rounded-lg border border-gray-100 bg-white flex flex-col gap-1.5 hover:border-gray-300 transition-colors shadow-sm">
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{phase.label}</span>
                     <div className="relative">
                       <select
                         value={task[phase.key]}
                         onChange={(e) => updateField(phase.key, e.target.value)}
-                        className={`w-full appearance-none border-none rounded-xl text-[10px] font-black uppercase py-2.5 px-3 focus:ring-2 focus:ring-[#00ED64] cursor-pointer outline-none shadow-sm pr-8 transition-all ${getStatusStyles(task[phase.key])}`}
+                        className={`w-full appearance-none border rounded text-[11px] font-bold py-1.5 pl-2 pr-6 outline-none transition-all cursor-pointer ${getStatusStyles(task[phase.key])}`}
                       >
                         {phase.options.map(opt => (
-                          <option key={opt} value={opt} className="bg-white text-black font-normal">
+                          <option key={opt} value={opt} className="bg-white text-[#001E2B] font-semibold">
                             {opt}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" />
+                      <ChevronDown size={12} className={`absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none ${task[phase.key] === 'Done' || task[phase.key] === 'Pass' ? 'text-[#00ED64]' : 'text-gray-400'}`} />
                     </div>
                   </div>
                 ))}
@@ -245,16 +261,15 @@ const Task = () => {
           </div>
         </div>
 
-        {/* MODIFIED: Added overflow-hidden to trap the comment scroll in the right column */}
-        <div className="flex-1 bg-gray-50/20 p-8 flex flex-col overflow-hidden">
+        {/* RIGHT COLUMN */}
+        <div className="flex-1 bg-[#F8FAFC] border-l border-gray-200 flex flex-col overflow-hidden relative">
           
-          {/* MODIFIED: Added flex-1 flex flex-col min-h-0 to make the internal comment list strictly scrollable */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2 shrink-0">
-              <MessageSquare size={18} /> Discussion
+          <div className="flex-1 flex flex-col min-h-0 p-6">
+            <h3 className="text-[10px] font-bold text-[#001E2B] uppercase tracking-[0.2em] mb-3 flex items-center gap-2 shrink-0">
+              <MessageSquare size={14} className="text-[#00ED64]" /> Communications
             </h3>
 
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 bg-white rounded-lg border border-gray-200 shadow-sm">
               <CommentSection
                 taskId={taskId}
                 workspaceMembers={workspaceMembers}
@@ -262,36 +277,36 @@ const Task = () => {
             </div>
           </div>
 
-          {/* MODIFIED: Added shrink-0 and mt-6 so the bottom details don't get squished by the comments */}
-          <div className="pt-6 border-t border-gray-100 space-y-6 shrink-0 mt-6">
-            <div className="space-y-3">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                <Calendar size={14} /> Set Deadline
+          <div className="p-6 bg-[#001E2B] text-white shrink-0 shadow-[0_-10px_40px_rgba(0,30,43,0.1)]">
+            <div className="space-y-2 mb-4">
+              <label className="text-[10px] font-bold text-[#00ED64] uppercase tracking-[0.2em] flex items-center gap-2">
+                <Calendar size={12} /> Target Deployment
               </label>
               <input
                 type="date"
                 value={task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ""}
                 onChange={(e) => updateField('dueDate', e.target.value)}
-                className="w-full bg-white border border-gray-100 p-4 rounded-2xl text-sm font-bold text-[#001E2B] focus:ring-2 focus:ring-[#00ED64] outline-none shadow-sm transition-all cursor-pointer"
+                className="w-full bg-white/10 border border-white/20 p-2.5 rounded text-sm font-semibold text-white focus:border-[#00ED64] focus:ring-1 focus:ring-[#00ED64] outline-none transition-all cursor-pointer color-scheme-dark"
+                style={{ colorScheme: 'dark' }} 
               />
             </div>
-            <div className="space-y-4">
+            
+            <div className="space-y-3 pt-3 border-t border-white/10">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400 flex items-center gap-2"><Clock size={12} /> Created On</span>
-                <span className="font-bold text-[#001E2B]">{new Date(task.createdAt).toLocaleDateString()}</span>
+                <span className="text-gray-400 font-mono tracking-wide uppercase text-[10px]">Initialization</span>
+                <span className="font-bold">{new Date(task.createdAt).toLocaleDateString()}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400 flex items-center gap-2"><User size={12} /> Owner</span>
-                <span className="font-bold text-[#001E2B]">{task.createdBy?.name}</span>
+                <span className="text-gray-400 font-mono tracking-wide uppercase text-[10px]">Authored By</span>
+                <span className="font-bold text-[#001E2B] bg-[#00ED64] px-2 py-0.5 rounded-sm text-[10px] uppercase tracking-wider">{task.createdBy?.name}</span>
               </div>
             </div>
           </div>
         </div>
 
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default Task
+export default Task;

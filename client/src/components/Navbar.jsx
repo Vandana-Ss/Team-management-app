@@ -2,6 +2,8 @@ import { Bell, UserCircle, ChevronLeft } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import API from '../api/axios'
+import ProfileDropdown from './ProfileDropdown'
+
 
 const Navbar = () => {
   const userName = localStorage.getItem('userName') || 'User'
@@ -42,7 +44,6 @@ const Navbar = () => {
             {hasPending && <span className="absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"></span>}
           </button>
 
-          {/* D365 Style Dropdown */}
           <div className="absolute right-0 mt-2 w-80 bg-white/95 backdrop-blur-xl border border-gray-100 rounded-4xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-5">
             <h4 className="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest px-1">Notifications</h4>
             {hasPending ? (
@@ -54,10 +55,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
-          <div className="text-right"><p className="text-sm font-bold text-[#001E2B]">{userName}</p><p className="text-xs text-gray-400">Pro Plan</p></div>
-          <UserCircle size={35} className="text-gray-300" />
-        </div>
+        <ProfileDropdown />
       </div>
     </header>
   )
