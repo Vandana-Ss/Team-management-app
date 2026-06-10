@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
     },
+    emailNotifications: {
+        type: Boolean,
+        default: true
+    },
 },
     {
         timestamps: true

@@ -130,7 +130,8 @@ const getUserWorkspaces = async (req, res) => {
                 taskCount: taskCount,
                 createdAt: m.workspace.createdAt,
                 updatedAt: m.workspace.updatedAt,
-                owner: m.workspace.owner || { name: "System" }
+                owner: m.workspace.owner || { name: "System" },
+                role: m.role
             }
         }))
 
@@ -332,6 +333,28 @@ const workspaceArchived = async (req, res) => {
     }
 }
 
+const leaveWorkspace = async (req, res) => {
+    try {
+        const { workspaceId } = req.params
+
+        const membership = await Member.findOne({ user: req.user._id, workspace: workspaceId })
+
+        if (!membership) {
+            return res.status(404).json({ message: 'You are not a member of this workspace' })
+        }
+
+        if (membership.role === 'owner') {
+            return res.status(403).json({ message: 'Owners cannot leave a workspace. Transfer ownership or delete it.' })
+        }
+
+        await Member.findByIdAndDelete(membership._id)
+
+        res.json({ message: 'Left workspace successfully' })
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
 module.exports = {
     joinWorkspace,
     createWorkspace,
@@ -343,5 +366,6 @@ module.exports = {
     searchWorkspaceMembers,
     getInviteInfo,
     updateMemberStatus,
-    workspaceArchived
+    workspaceArchived,
+    leaveWorkspace
 }

@@ -12,7 +12,8 @@ const { joinWorkspace,
     searchWorkspaceMembers,
     getInviteInfo,
     updateMemberStatus,
-    workspaceArchived } = require('../controllers/workspaceController')
+    workspaceArchived,
+    leaveWorkspace } = require('../controllers/workspaceController')
 
 
 router.post('/', protect, createWorkspace)
@@ -23,6 +24,7 @@ router.get('/:workspaceId/members', protect, getWorkspaceMembers)
 router.get('/:workspaceId/search-members', protect, searchWorkspaceMembers)
 router.get('/invite-info/:inviteCode', protect, getInviteInfo)
 
+router.delete('/:workspaceId/leave', protect, leaveWorkspace)
 router.delete('/:workspaceId', protect, checkRole(['admin', 'owner']), deleteWorkSpace)
 /* 
 router.patch('/:workspaceId/members/:memberId', protect, checkRole(['owner']), updateMemberRole)

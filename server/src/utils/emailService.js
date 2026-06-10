@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const User = require('../models/userModel');
 
 const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'yahoo';
 const EMAIL_USER = process.env.EMAIL_USER;
@@ -26,6 +27,11 @@ transporter.verify((err, success) => {
 });
 
 const sendMentionEmail = async (toEmail, mentionerName, workspaceId, taskId, taskTitle) => {
+  const recipient = await User.findOne({ email: toEmail }).select('emailNotifications');
+  if (recipient && recipient.emailNotifications === false) {
+    return;
+  }
+
   if (!EMAIL_USER || !EMAIL_PASS) {
     const err = new Error('Email credentials not configured');
     console.error('sendMentionEmail aborted:', err.message);
