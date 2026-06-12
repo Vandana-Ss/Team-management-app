@@ -2,6 +2,8 @@ const User = require('../models/userModel')
 const jwt = require('jsonwebtoken')
 const passport = require('passport')
 const bcrypt = require('bcrypt')
+const path = require('path')
+const fs = require('fs')
 const Workspace = require('../models/workspaceModel')
 const Member = require('../models/memberModel')
 const Task = require('../models/taskModel')
@@ -70,7 +72,8 @@ const getMe = async (req, res) => {
             _id: req.user._id,
             name: req.user.name,
             email: req.user.email,
-            emailNotifications: req.user.emailNotifications ?? true
+            emailNotifications: req.user.emailNotifications ?? true,
+            profilePicture: req.user.profilePicture || null
         })
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -184,6 +187,49 @@ const deleteAccount = async (req, res) => {
     }
 }
 
+const uploadProfilePicture = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' })
+        }
+
+        const user = await User.findById(req.user._id)
+
+        if (user.profilePicture) {
+            const oldFilePath = path.join(__dirname, '../../../uploads/avatars', path.basename(user.profilePicture))
+            try {
+                if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath)
+            } catch (_) {}
+        }
+
+        const profilePicture = `/uploads/avatars/${req.file.filename}`
+        await User.findByIdAndUpdate(req.user._id, { profilePicture }, { new: true })
+
+        res.json({ profilePicture })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+const removeProfilePicture = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+
+        if (user.profilePicture) {
+            const oldFilePath = path.join(__dirname, '../../../uploads/avatars', path.basename(user.profilePicture))
+            try {
+                if (fs.existsSync(oldFilePath)) fs.unlinkSync(oldFilePath)
+            } catch (_) {}
+        }
+
+        await User.findByIdAndUpdate(req.user._id, { profilePicture: null })
+
+        res.json({ message: 'Profile picture removed' })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 module.exports = {
     registerUser,
     loginUser,
@@ -192,5 +238,7 @@ module.exports = {
     updateProfile,
     updatePassword,
     updateNotifications,
-    deleteAccount
+    deleteAccount,
+    uploadProfilePicture,
+    removeProfilePicture
 }

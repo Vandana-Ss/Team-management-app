@@ -35,6 +35,7 @@ const Task = () => {
         setLoading(true);
         const { data: taskData } = await API.get(`/tasks/${workspaceId}/${taskId}`);
         setTask(taskData);
+        localStorage.setItem(`task_${taskId}`, JSON.stringify({ numericId: taskData.numericId, title: taskData.title }))
         setPrimaryQuery(taskData.primaryAssignee?.name || '');
         setSecondaryQuery(taskData.secondaryAssignee?.name || '');
 

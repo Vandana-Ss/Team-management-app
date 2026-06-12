@@ -111,7 +111,7 @@ const Home = () => {
               <div
                 key={ws._id}
                 onClick={() => navigate(`/workspace/${ws._id}`)}
-                className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-gray-200 transition-all group cursor-pointer flex flex-col"
+                className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#00ED64]/30 hover:-translate-y-1 transition-all duration-200 group cursor-pointer flex flex-col"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-[#001E2B] font-bold text-lg group-hover:bg-[#001E2B] group-hover:text-[#00ED64] transition-colors">

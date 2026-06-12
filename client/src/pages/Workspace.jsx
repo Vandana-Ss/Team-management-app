@@ -9,7 +9,8 @@ import {
   X,
   Users as UsersIcon,
   Trash2,
-  ChevronDown
+  ChevronDown,
+  Link as LinkIcon
 } from 'lucide-react'
 import API from '../api/axios'
 import { toast } from 'react-toastify'
@@ -20,6 +21,7 @@ const Workspace = () => {
   const { workspaceId } = useParams()
 
   const [workspaceName, setWorkspaceName] = useState("")
+  const [inviteCode, setInviteCode] = useState("")
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [viewType, setViewType] = useState('list')
@@ -54,7 +56,10 @@ const Workspace = () => {
       ])
 
       const found = wsRes.data.workspaces?.find(ws => ws._id === workspaceId)
-      setWorkspaceName(found ? found.name : "My Workspace")
+      const name = found ? found.name : "My Workspace"
+      setWorkspaceName(name)
+      setInviteCode(found?.inviteCode || "")
+      localStorage.setItem(`ws_${workspaceId}`, name)
       setTasks(taskRes.data)
 
       const allMembers = memberRes.data
@@ -167,7 +172,11 @@ const Workspace = () => {
               </button>
             )}
           </div>
-          <p className="text-gray-400 mt-2 text-[10px] font-mono tracking-widest uppercase">ID: {workspaceId}</p>
+          {inviteCode && (
+            <p className="text-gray-400 mt-1.5 text-[10px] font-mono tracking-widest uppercase flex items-center gap-1.5">
+              <LinkIcon size={10} /> Invite Code: {inviteCode}
+            </p>
+          )}
         </div>
         
         <button 
@@ -358,9 +367,9 @@ const Workspace = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {tasks.map(task => (
-                    <tr key={task._id} onClick={() => navigate(`/workspace/${workspaceId}/task/${task._id}`)} className="hover:bg-gray-200 cursor-pointer transition-colors group">
+                    <tr key={task._id} onClick={() => navigate(`/workspace/${workspaceId}/task/${task._id}`)} className="hover:bg-[#F0FDF6] cursor-pointer transition-all group border-l-4 border-l-transparent hover:border-l-[#00ED64]">
                       <td className="px-8 py-2 text-xs font-mono font-medium text-green-700">#{task.numericId || 'N/A'}</td>
-                      <td className="px-6 py-2 text-sm font-medium text-gray-700 text-[#001E2B]">{task.title}</td>
+                      <td className="px-6 py-2 text-sm font-medium text-gray-700 group-hover:text-[#001E2B] group-hover:font-bold transition-all">{task.title}</td>
                       <td className="px-6 py-2 text-sm text-gray-600 font-medium">{task.primaryAssignee?.name || <span className="text-gray-300 italic">Unassigned</span>}</td>
                       <td className="px-6 py-2"><StatusBadge status={task.devStatus} /></td>
                       <td className="px-6 py-2"><StatusBadge status={task.unitTestStatus} /></td>

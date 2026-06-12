@@ -5,11 +5,37 @@ import API from '../api/axios'
 import ProfileDropdown from './ProfileDropdown'
 
 
+const formatBreadcrumb = (pathname) => {
+  const labelMap = {
+    home: 'Dashboard',
+    workspaces: 'All Workspaces',
+    workspace: 'Workspace',
+    settings: 'Settings',
+    'archive-bin': 'Archive Bin',
+    task: 'Task',
+  }
+  return pathname
+    .split('/')
+    .filter(Boolean)
+    .map(seg => {
+      if (/^[0-9a-fA-F]{24}$/.test(seg)) {
+        const ws = localStorage.getItem(`ws_${seg}`)
+        if (ws) return ws
+        try {
+          const t = JSON.parse(localStorage.getItem(`task_${seg}`) || '{}')
+          if (t.numericId) return `#${t.numericId}`
+        } catch (_) {}
+        return '...'
+      }
+      return labelMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, ' ')
+    })
+    .join('  /  ')
+}
+
 const Navbar = () => {
-  const userName = localStorage.getItem('userName') || 'User'
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   const workspaceId = location.pathname.split('/')[2]
   const [hasPending, setHasPending] = useState(false)
   const isHomePage = location.pathname === '/home'
@@ -34,7 +60,7 @@ const Navbar = () => {
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 relative z-60">
       <div className="flex items-center gap-4">
         {!isHomePage && <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400"><ChevronLeft size={20} /></button>}
-        <div className="text-gray-400 font-medium capitalize">{location.pathname.replace('/', ' ').replace('/', ' / ')}</div>
+        <div className="text-sm text-gray-400 font-medium">{formatBreadcrumb(location.pathname)}</div>
       </div>
       
       <div className="flex items-center gap-6">

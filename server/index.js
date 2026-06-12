@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path')
 require('dotenv').config()
 const session = require('express-session')
 const passport = require('passport')
@@ -18,6 +19,7 @@ app.set('json spaces', 2)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 const corsOptions = {
     origin: process.env.CLIENT_URL || 'http://localhost:5173', 

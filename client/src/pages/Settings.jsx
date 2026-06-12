@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   User, Shield, Bell, Building2, AlertTriangle,
   ChevronRight, Eye, EyeOff, Lock, Loader2,
-  LogOut, CheckCircle2
+  LogOut, CheckCircle2, Camera, Trash2
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import API from '../api/axios';
+
+const SERVER_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace('/api', '');
 
 const getPasswordStrength = (pwd) => {
   if (!pwd) return null;
@@ -68,6 +70,9 @@ const Settings = () => {
   const [profile, setProfile] = useState({ name: '', email: '' });
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Security
   const [passwords, setPasswords] = useState({ current: '', newPass: '', confirm: '' });
@@ -92,6 +97,7 @@ const Settings = () => {
       .then(res => {
         setProfile({ name: res.data.name, email: res.data.email });
         setEmailNotifications(res.data.emailNotifications ?? true);
+        setProfilePicture(res.data.profilePicture || null);
       })
       .catch(() => toast.error('Failed to load profile'))
       .finally(() => {
@@ -104,6 +110,40 @@ const Settings = () => {
       .catch(() => toast.error('Failed to load workspaces'))
       .finally(() => setWorkspacesLoading(false));
   }, []);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('avatar', file);
+    setUploading(true);
+    try {
+      const { data } = await API.patch('/auth/profile-picture', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setProfilePicture(data.profilePicture);
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({ ...stored, profilePicture: data.profilePicture }));
+      toast.success('Profile picture updated');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemovePicture = async () => {
+    try {
+      await API.delete('/auth/profile-picture');
+      setProfilePicture(null);
+      const stored = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({ ...stored, profilePicture: null }));
+      toast.success('Profile picture removed');
+    } catch {
+      toast.error('Failed to remove picture');
+    }
+  };
 
   const handleProfileSave = async () => {
     if (!profile.name.trim()) return toast.error('Name cannot be empty');
@@ -246,12 +286,53 @@ const Settings = () => {
               ) : (
                 <div className="space-y-6">
                   <div className="flex items-center gap-5 p-5 bg-gray-50 rounded-2xl border border-gray-100">
-                    <div className="w-20 h-20 rounded-full bg-[#001E2B] text-[#00ED64] flex items-center justify-center text-2xl font-bold shadow-md select-none shrink-0">
-                      {getInitials(profile.name)}
+                    <div className="flex flex-col items-center gap-2">
+                      <div
+                        onClick={() => !uploading && fileInputRef.current?.click()}
+                        className="relative w-20 h-20 rounded-full cursor-pointer group shrink-0"
+                        title="Click to change photo"
+                      >
+                        {profilePicture ? (
+                          <img
+                            src={`${SERVER_BASE}${profilePicture}`}
+                            alt="avatar"
+                            className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 shadow-md"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full bg-[#001E2B] text-[#00ED64] flex items-center justify-center text-2xl font-bold shadow-md select-none">
+                            {getInitials(profile.name)}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          {uploading
+                            ? <Loader2 size={20} className="text-white animate-spin" />
+                            : <Camera size={18} className="text-white" />
+                          }
+                        </div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </div>
+                      {profilePicture && (
+                        <button
+                          onClick={handleRemovePicture}
+                          className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-600 transition-colors font-semibold"
+                        >
+                          <Trash2 size={10} /> Remove
+                        </button>
+                      )}
+                      {!profilePicture && (
+                        <p className="text-[10px] text-gray-400">Click to upload</p>
+                      )}
                     </div>
                     <div>
                       <p className="font-bold text-[#001E2B] text-lg leading-tight">{profile.name}</p>
                       <p className="text-sm text-gray-400 mt-0.5">{profile.email}</p>
+                      <p className="text-[10px] text-gray-300 mt-2">JPEG, PNG, WebP or GIF · Max 2MB</p>
                     </div>
                   </div>
 
